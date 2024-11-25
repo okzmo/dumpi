@@ -1,15 +1,28 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
-	import { fade } from 'svelte/transition';
+	import { expoOut } from 'svelte/easing';
+	import { fly } from 'svelte/transition';
 
 	let active = $state(false);
+	let input = $state<HTMLInputElement | null>(null);
 
 	onMount(() => {
 		window.addEventListener('keydown', (e) => {
 			if (e.metaKey && e.key === 'k') {
 				active = !active;
 			}
+			if (e.key === 'Escape') {
+				active = false;
+			}
 		});
+	});
+
+	$effect(() => {
+		if (active) {
+			input?.focus();
+		} else {
+			input?.blur();
+		}
 	});
 </script>
 
@@ -33,9 +46,15 @@
 
 {#if active}
 	<input
-		transition:fade={{ duration: 125 }}
+		bind:this={input}
+		transition:fly={{
+			y: active ? 100 : 0,
+			duration: active ? 125 : 75,
+			delay: active ? 125 : 0,
+			easing: expoOut
+		}}
 		placeholder="Search"
-		class="fixed bottom-9 left-16 z-[20] border-none bg-transparent text-4xl italic text-zinc-50 placeholder:text-zinc-50/30"
+		class="fixed bottom-9 left-16 z-[20] w-[calc(100%-4rem*2)] border-none bg-transparent text-4xl italic text-zinc-50 placeholder:text-zinc-50/30 focus:shadow-none focus:outline-none focus:ring-transparent focus-visible:outline-none"
 	/>
 {/if}
 
@@ -48,7 +67,7 @@
 </div>
 
 <div
-	class="blur-menu top top-0 h-[500px] translate-y-[-500px] transition-transform duration-300"
+	class="blur-menu top top-0 h-[500px] translate-y-[-500px] transition-transform duration-[350ms] ease-power2-in"
 	class:active
 >
 	<div class="layer top-0"></div>
@@ -60,7 +79,7 @@
 </div>
 
 <div
-	class="blur-menu bottom bottom-0 h-[800px] translate-y-[800px] transition-transform duration-300"
+	class="blur-menu bottom bottom-0 h-[800px] translate-y-[800px] transition-transform duration-[350ms] ease-power2-in"
 	class:active
 >
 	<div class="layer bottom-0"></div>
